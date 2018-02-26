@@ -42,11 +42,12 @@ class Juego(pilasengine.escenas.Escena):
         self.Boton_Volver.x = 200
 
         self.Boton_Volver.conectar(self.Volver)
-        chavo = pilas.actores.Chavo()
         pilas.tareas.siempre(1, crear_torta)
         pilas.tareas.siempre(2, crear_bruja)
-    #    puntos = pilas.actores.Puntos()
-
+        chavo = pilas.actores.Chavo()
+        pilas.avisar(u"Intente atrapar la mayor cantidad de Tortas de Jamon")
+        pilas.colisiones.agregar("chavo", "torta", cuando_toca_torta)
+        pilas.colisiones.agregar("chavo", "bruja", cuando_toca_bruja)
 
     def actualizar(self):
         pass
@@ -72,7 +73,8 @@ class Ganaste(pilasengine.escenas.Escena):
 class Perdiste(pilasengine.escenas.Escena):
 
     def iniciar(self):
-        self.fondo = pilas.fondos.Noche()
+        fondo = pilas.fondos.Fondo()
+        fondo.imagen = pilas.imagenes.cargar("data/perdiste.png")
         self.Boton_Volver = pilas.interfaz.Boton("Volver al Menu")
         self.Boton_Volver.y = -100
         self.Boton_Volver.conectar(self.Volver)
@@ -152,19 +154,7 @@ class Bruja(pilasengine.actores.Aceituna):
         # Eliminar el objeto cuando sale de la pantalla.
         if self.y < -300:
             self.eliminar()
-"""
-class Puntos(pilasengine.actores.Puntaje):
 
-    def iniciar(self):
-        self.x = -365
-        self.y = 200
-        self.color = pilas.colores.blanco
-
-    def actualizar(self):
-        pass
-"""
-tortas = pilas.actores.Grupo()
-brujas = pilas.actores.Grupo()
 
 def crear_torta():
     actor = pilas.actores.Torta_de_Jamon()
@@ -174,6 +164,28 @@ def crear_bruja():
     actor1 = pilas.actores.Bruja()
     brujas.agreagar(actor1)
 
+puntaje = pilas.actores.Puntaje(-300, 200, color=pilas.colores.blanco)
+
+def cuando_toca_torta(c, t):
+    t.eliminar()
+    puntaje.aumentar(1)
+    puntaje.escala = 2
+    puntaje.escala = [1], 0.2
+    puntaje.rotacion = random.randint(30, 60)
+    puntaje.rotacion = [0], 0.2
+
+def cuando_toca_bruja(c, b):
+    b.eliminar()
+    puntaje.escala = 2
+    puntaje.escala = [1], 2.0
+    puntaje.rotacion = random.randint(30, 60)
+    puntaje.rotacion = [0], 0.2
+    c.eliminar()
+    pilas.escenas.Perdiste()
+
+tortas = pilas.actores.Grupo()
+brujas = pilas.actores.Grupo()
+
 pilas.escenas.vincular(Menu)
 pilas.escenas.vincular(Juego)
 pilas.escenas.vincular(Ganaste)
@@ -181,7 +193,6 @@ pilas.escenas.vincular(Perdiste)
 pilas.actores.vincular(Chavo)
 pilas.actores.vincular(Torta_de_Jamon)
 pilas.actores.vincular(Bruja)
-#pilas.actores.vincular(Puntos)
 pilas.escenas.Menu()
 
 pilas.ejecutar()
